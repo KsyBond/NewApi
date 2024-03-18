@@ -1,35 +1,33 @@
 package handlers
 
 import (
+	"awesomeProject/server/models"
+	"awesomeProject/server/render"
+	"awesomeProject/storage"
 	"fmt"
 	"net/http"
-	- "github.com/mattn/go-sqlite3"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func NewsOpen(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello")
 }
 
-func newsCreate(w http.ResponseWriter, r *http.Request) {
-	title := r.FormValue("title")
-	description := r.FormValue("description")
-
-	stmt, err := db.Prepare("INSERT INTO News (Title, Description) VALUES (?, ?)")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+func CreateNews(s *storage.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		const op = "request.CreateNews"
+		post := models.Post{}
+		err := render.DecodeJSON(r.Body, &post)
+		if err != nil {
+			fmt.Println(op + err.Error())
+		}
+		s.Create(&post)
+		if err != nil {
+			fmt.Println(op + err.Error())
+		}
+		fmt.Fprintf(w, "item created")
 	}
-	res, err := stmt.Exec(title, description)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	lastID, err := res.LastInsertId()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	fmt.Fprintf(w, "News item created with ID: %d", lastID)
 }
 
 func newsDelete(w http.ResponseWriter, r *http.Request) {
