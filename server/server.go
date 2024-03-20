@@ -1,18 +1,22 @@
 package server
 
 import (
-	"awesomeProject/server/handlers"
+	"NewApi/server/handlers"
 	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type Server struct {
-	Host string
-	Port string
+	Host   string
+	Port   string
+	Router *mux.Router
 }
 
 func New() *Server {
 	var s Server
+	s.Router = mux.NewRouter()
 	return &s
 }
 
@@ -22,4 +26,7 @@ func (s *Server) Start() {
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+
+func (s *Server) configureRouter() {
 }
