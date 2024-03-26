@@ -30,42 +30,34 @@ func CreateNews(s *storage.Storage) http.HandlerFunc {
 	}
 }
 
-func newsDelete(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len("/news/delete/")]
-
-	stmt, err := db.Prepare("DELETE FROM News WHERE ID=?")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+func newsDelete(s *storage.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		const op = "request.DeleteNews"
+		post := models.Post{}
+		err := render.DecodeJSON(r.Body, &post)
+		if err != nil {
+			fmt.Println(op + err.Error())
+		}
+		s.Delete(&post)
+		if err != nil {
+			fmt.Println(op + err.Error())
+		}
+		fmt.Fprintf(w, "item deleted")
 	}
-	res, err := stmt.Exec(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	rowsAffected, err := res.RowsAffected()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	fmt.Fprintf(w, "News item with ID %s deleted. Rows affected: %d", id, rowsAffected)
 }
 
-func newsUpdate(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len("/news/update/")]
-	description := r.FormValue("description")
-
-	stmt, err := db.Prepare("UPDATE News SET Description=? WHERE ID=?")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+func newsUpdate(s *storage.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		const op = "request.UpdateNews"
+		post := models.Post{}
+		err := render.DecodeJSON(r.Body, &post)
+		if err != nil {
+			fmt.Println(op + err.Error())
+		}
+		s.Update(&post)
+		if err != nil {
+			fmt.Println(op + err.Error())
+		}
+		fmt.Fprintf(w, "item deleted")
 	}
-
-	_, err = stmt.Exec(description, id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprintf(w, "News item with ID %s updated", id)
 }

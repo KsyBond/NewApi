@@ -1,7 +1,7 @@
 package server
 
 import (
-	"NewApi/server/handlers"
+	"awesomeProject/server/handlers"
 	"fmt"
 	"net/http"
 
